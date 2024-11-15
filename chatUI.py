@@ -2,7 +2,7 @@ import streamlit as st
 from chatModule import ollamaGenerator as chatbot
 from langchain_ollama import ChatOllama
 
-ollamaGen = chatbot("smollm2:360m" , 0.5)
+ollamaGen = chatbot("gemma2:2b" , 0.5)
 chatMsgHistory = []
 if "chatMsgHistory" not in st.session_state:
     st.session_state.chatMsgHistory = []
@@ -29,9 +29,13 @@ if userInput:
     with st.chat_message("user"):
         st.write(userInput)
 
-    modelRes = ollamaGen.chatResponse(userInput)
+    msgHistoryList = []
+    for msgHis in st.session_state.chatMsgHistory:
+        msgHistoryList.append((msgHis["role"] , msgHis["content"]))
+
+    modelRes = ollamaGen.chatResponse(userInput , msgHistoryList)
     if modelRes.content:
-        st.session_state.chatMsgHistory.append({"role": "Assistant", "content": modelRes.content})
+        st.session_state.chatMsgHistory.append({"role": "ai", "content": modelRes.content})
         print(modelRes.content)
-        with st.chat_message("Assistant"):
+        with st.chat_message("ai"):
             st.markdown(modelRes.content)
