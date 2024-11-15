@@ -5,3 +5,5 @@
 3. install requirement.txt by `pip install -r requirement.txt`
 4. Run the app by `streamlit run chatUI.py`
 Attention: You may encounter "Module not found " error when running the app. Please add the package path to $PATH manually. This is may be due to the streamlit $PATH detection.
+
+Please make sure Ollama is running on your local machine. Set the model in the chatUI.py with whatever model you've already pulled in the ollama
