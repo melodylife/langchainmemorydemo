@@ -33,9 +33,12 @@ if userInput:
     for msgHis in st.session_state.chatMsgHistory:
         msgHistoryList.append((msgHis["role"] , msgHis["content"]))
 
-    modelRes = ollamaGen.chatResponse(userInput , msgHistoryList)
+    #modelRes = ollamaGen.chatResponse(userInput , msgHistoryList)
+    modelRes = ollamaGen.chatResbySummary(userInput , st.session_state.chatMsgHistory)
     if modelRes.content:
         st.session_state.chatMsgHistory.append({"role": "ai", "content": modelRes.content})
-        print(modelRes.content)
+        #print(modelRes.content)
+        msgHistoryList.append(("user" , modelRes.content))
+        #ollamaGen.summarizeHistory(st.session_state.chatMsgHistory)
         with st.chat_message("ai"):
             st.markdown(modelRes.content)
