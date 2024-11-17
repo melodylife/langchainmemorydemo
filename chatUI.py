@@ -2,26 +2,27 @@ import streamlit as st
 from chatModule import ollamaGenerator as chatbot
 from langchain_ollama import ChatOllama
 
-ollamaGen = chatbot("gemma2:2b" , 0.5)
+ollamaGen = chatbot("llama3.2:latest" , 0.5)
 chatMsgHistory = []
 
 if "chatMsgHistory" not in st.session_state:
     st.session_state.chatMsgHistory = []
 if "inputToken" not in st.session_state:
     st.session_state.inputToken = 0
-if "memofunc" not in st.session_state:
-    st.session_state.memofunc = 0
+if "chatmodel" not in st.session_state:
+    st.session_state.chatmodel = ""
 
 for msgItem in st.session_state.chatMsgHistory:
     with st.chat_message(msgItem["role"]):
         st.markdown(msgItem["content"])
 
 with st.sidebar:
-    uploadFile = st.file_uploader(
-        "Upload the PDF file for RAG trial"
-    )
-    if uploadFile is not None:
-        print(f"Filename is : {uploadFile.name}")
+    modelSel = st.selectbox("Choose the model",
+                    ["llama3.2:latest" , "gemma2:2b"],
+                 index = 0,
+                 )
+    ollamaGen.setModel(modelSel)
+    #st.session_state.chatmodel = modelSel
     tokenAmnt = st.info("" , icon = "👀")
     st.divider()
     memoFunction = st.radio(
@@ -49,7 +50,7 @@ if userInput:
     modelRes = None
     if memoFunction == "Full memory history":
         modelRes = ollamaGen.chatResponse(userInput , msgHistoryList)
-    elif memoFunction == "Summary of History": 
+    elif memoFunction == "Summary of History":
         modelRes = ollamaGen.chatResbySummary(userInput , st.session_state.chatMsgHistory)
     if modelRes.content:
         st.session_state.chatMsgHistory.append({"role": "ai", "content": modelRes.content})

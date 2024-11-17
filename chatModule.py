@@ -8,7 +8,7 @@ class ollamaGenerator:
     memType = ""
     systemMsg = ""
     histSummary = ""
-    def __init__(self , model , temperature = 0.2 , systemMsg = ""):
+    def __init__(self , model = None , temperature = 0.2 , systemMsg = ""):
         self.model = model
         self.temperature = temperature
         self.systemMsg = systemMsg
@@ -19,6 +19,10 @@ class ollamaGenerator:
             temperature = self.temperature
         )
         return llm
+
+    def setModel(self , modelSel):
+        print(f"Model is set to {modelSel}")
+        self.model = modelSel
 
     def summarizeHistory(self , chatHistory):
         msghistory = [("system" , "You are helpful assistant having expertise on summarizing chat history without missing any details.") , ("user" , "Following Chat History is a history of humane and AI assistant chat. Summarize the chat history into a single summary message. Include as many specific details as you can. Respond user only with the content of the summary but no other extra content generated.  Place the summarized content after keyword summary in the format of SUMMARY: . \n\n Chat History: {chathist}")]
