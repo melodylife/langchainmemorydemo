@@ -14,6 +14,7 @@ llm = ChatOllama(model = "gemma2:2b")
 
 def chatbot(state: State):
     return {"messages": [llm.invoke(state["messages"])]}
+
 memory = MemorySaver()
 graph_builder.add_node("chatbot" , chatbot)
 graph_builder.add_edge(START , "chatbot")

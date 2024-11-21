@@ -17,7 +17,7 @@ def streamWrapper(streamLLM):
     for chunk in streamLLM:
         aggregate = chunk if aggregate is None else aggregate + chunk
         yield(chunk)
-    st.session_state.inputToken = aggregate.usage_metadata["input_tokens"]
+    #st.session_state.inputToken = aggregate.usage_metadata["input_tokens"]
     return aggregate
 
 for msgItem in st.session_state.chatMsgHistory:

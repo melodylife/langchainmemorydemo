@@ -2,16 +2,44 @@ from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.globals import set_verbose
 
+
+from langchain_ollama import ChatOllama
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.message import add_messages
+from typing import Annotated
+from typing_extensions import TypedDict
+from langgraph.checkpoint.memory import MemorySaver
+
+class State(TypedDict):
+    messages: Annotated[list , add_messages]
+
 class ollamaGenerator:
     model = ""
     temperature = 0.2
     memType = ""
     systemMsg = ""
     histSummary = ""
+    graph = None
+
     def __init__(self , model = None , temperature = 0.2 , systemMsg = ""):
         self.model = model
         self.temperature = temperature
         self.systemMsg = systemMsg
+        #Create agent by langgraph
+
+    def compileGraph(self):
+        graph_builder = StateGraph(State)
+        memory = MemorySaver()
+        graph_builder.add_node("chatbot" , self.chatbot)
+        graph_builder.add_edge(START , "chatbot")
+        graph_builder.add_edge("chatbot" , END)
+        self.graph = graph_builder.compile(checkpointer = memory)
+
+
+    def chatbot(self , state: State):
+        llm = self.generateLLM("")
+        #return {"messages": [llm.invoke(state["messages"])]}
+        return {"messages": [llm.stream(state["messages"])]}
 
     def generateLLM(self , model):
         llm = ChatOllama(
@@ -29,6 +57,10 @@ class ollamaGenerator:
             return self.chatResponse(userMsg , chatHistory)
         elif histAppr == "Summary of History":
             return self.chatResbySummary(userMsg , chatHistory)
+        else:
+            self.compileGraph()
+            config = {"configurable": {"thread_id": "1"}}
+            return self.graph.stream({"messages": [("user" , userMsg)]} , config , stream_mode = "values")
 
     def summarizeHistory(self , chatHistory):
         msghistory = [("system" , "You are helpful assistant having expertise on summarizing chat history without missing any details.") , ("user" , "Following Chat History is a history of humane and AI assistant chat. Summarize the chat history into a single summary message. Include as many specific details as you can. Respond user only with the content of the summary but no other extra content generated.  Place the summarized content after keyword summary in the format of SUMMARY: . \n\n Chat History: {chathist}")]
