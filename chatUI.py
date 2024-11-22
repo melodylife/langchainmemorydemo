@@ -59,8 +59,10 @@ if userInput:
 
     modelRes = None
     streamOutput = ollamaGen.streamGenerator(userInput , st.session_state.chatMsgHistory , memoFunction)
+    #streamOutput = streamGenerator(ollamaGen.llmResponse((userInput , st.session_state.chatMsgHistory , memoFunction))
     with st.chat_message("ai"):
         modelRes =  st.write_stream(streamWrapper(streamOutput))
+        #modelRes =  st.write_stream(streamOutput)
         tokenAmnt.text(f"Here is the total input token of the prompt:  {st.session_state.inputToken}")
         st.session_state.chatMsgHistory.append({"role": "ai", "content": modelRes})
 
