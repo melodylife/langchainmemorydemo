@@ -50,6 +50,19 @@ class ollamaGenerator:
     def setModel(self , modelSel):
         self.model = modelSel
 
+    def llmResponse(self , userMsg , chatHistory , histAppr):
+        llmRes = ""
+        if histAppr == "Full memory history":
+            llmRes = self.chatResponse(userMsg , chatHistory)
+        elif histAppr == "Summary of History":
+            llmRes = self.chatResbySummary(userMsg , chatHistory)
+        else:
+            #self.compileGraph()
+            config = {"configurable": {"thread_id": "1"}}
+            event = self.graph.stream({"messages": [("user" , userMsg)]} , config , stream_mode = "updates")
+            llmRes = event["chatbot"]["messages"].content
+        return llmRes
+            
     def streamGenerator(self , userMsg , chatHistory , histAppr):
         if histAppr == "Full memory history":
             return self.chatResponse(userMsg , chatHistory)
@@ -84,7 +97,8 @@ class ollamaGenerator:
         #print("This is the summary "+ chatSummary)
         #print(promptTemplate.messages)
         set_verbose(True)
-        return chain.stream({"histSummary": chatSummary , "questionMsg": userMsg})
+        #return chain.stream({"histSummary": chatSummary , "questionMsg": userMsg})
+        return chain.invoke({"histSummary": chatSummary , "questionMsg": userMsg})
 
     def chatResponse(self , userMsg , msgHistory):
         chatHistory = []
@@ -98,6 +112,7 @@ class ollamaGenerator:
         promptTemplate = ChatPromptTemplate.from_messages(msgTemplate)
         llm = self.generateLLM(model = "gemma2:2b")
         chain = promptTemplate | llm
-        return chain.stream({"inputMsg": userMsg})
+        #return chain.stream({"inputMsg": userMsg})
+        return chain.invoke({"inputMsg": userMsg})
 
 

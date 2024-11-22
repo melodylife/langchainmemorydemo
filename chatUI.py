@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 from chatModule import ollamaGenerator as chatbot
 from langchain_ollama import ChatOllama
 
@@ -12,6 +13,11 @@ if "inputToken" not in st.session_state:
     st.session_state.inputToken = 0
 if "chatmodel" not in st.session_state:
     st.session_state.chatmodel = ""
+
+def streamGenerator(strContent):
+    for char in list(strContent):
+        yield char
+        time.sleep(0.01)
 
 def streamWrapper(streamLLM):
     aggregate = None
@@ -62,12 +68,18 @@ if userInput:
 
     modelRes = None
     streamOutput = ollamaGen.streamGenerator(userInput , st.session_state.chatMsgHistory , memoFunction)
+    #streamOutput = streamGenerator(ollamaGen.llmResponse((userInput , st.session_state.chatMsgHistory , memoFunction))
     with st.chat_message("ai"):
+<<<<<<< HEAD
         if memoFunction == "Lang-graph implementation":
             modelRes = resAgent(streamOutput)
             st.write(modelRes)
         else:
             modelRes =  st.write_stream(streamWrapper(streamOutput))
+=======
+        modelRes =  st.write_stream(streamWrapper(streamOutput))
+        #modelRes =  st.write_stream(streamOutput)
+>>>>>>> 44461ff5e8240eae3135c9ecf07e65e772690080
         tokenAmnt.text(f"Here is the total input token of the prompt:  {st.session_state.inputToken}")
         st.session_state.chatMsgHistory.append({"role": "ai", "content": modelRes})
 
