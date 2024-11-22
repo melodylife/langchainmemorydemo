@@ -1,4 +1,5 @@
 import streamlit as st
+import time
 from chatModule import ollamaGenerator as chatbot
 from langchain_ollama import ChatOllama
 
@@ -11,6 +12,12 @@ if "inputToken" not in st.session_state:
     st.session_state.inputToken = 0
 if "chatmodel" not in st.session_state:
     st.session_state.chatmodel = ""
+
+def streamGenerator(strContent):
+    for char in list(strContent):
+        yield char
+        time.sleep(0.01)
+        
 
 def streamWrapper(streamLLM):
     aggregate = None
