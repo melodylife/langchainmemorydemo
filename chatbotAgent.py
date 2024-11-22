@@ -33,7 +33,7 @@ while True:
     ):
         #print(event["messages"][-1].pretty_print())
         final_result = event
-    print(final_result["messages"][-1].content)
+        print(final_result["messages"][-1].content)
         #print(event.values())
         #for value in event.values():
             #print(value["messages"])

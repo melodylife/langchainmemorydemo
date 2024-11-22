@@ -3,6 +3,7 @@ from chatModule import ollamaGenerator as chatbot
 from langchain_ollama import ChatOllama
 
 ollamaGen = chatbot("llama3.2:latest" , 0.5)
+ollamaGen.compileGraph()
 chatMsgHistory = []
 
 if "chatMsgHistory" not in st.session_state:
@@ -19,6 +20,15 @@ def streamWrapper(streamLLM):
         yield(chunk)
     #st.session_state.inputToken = aggregate.usage_metadata["input_tokens"]
     return aggregate
+
+def resAgent(events):
+    result = None
+    for event in events:
+        print(event)
+        #result = event["chatbot"]["messages"][-1].content
+        result = event["messages"][-1].content
+    return result
+
 
 for msgItem in st.session_state.chatMsgHistory:
     with st.chat_message(msgItem["role"]):
@@ -53,7 +63,11 @@ if userInput:
     modelRes = None
     streamOutput = ollamaGen.streamGenerator(userInput , st.session_state.chatMsgHistory , memoFunction)
     with st.chat_message("ai"):
-        modelRes =  st.write_stream(streamWrapper(streamOutput))
+        if memoFunction == "Lang-graph implementation":
+            modelRes = resAgent(streamOutput)
+            st.write(modelRes)
+        else:
+            modelRes =  st.write_stream(streamWrapper(streamOutput))
         tokenAmnt.text(f"Here is the total input token of the prompt:  {st.session_state.inputToken}")
         st.session_state.chatMsgHistory.append({"role": "ai", "content": modelRes})
 
