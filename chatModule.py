@@ -26,15 +26,18 @@ class ollamaGenerator:
         self.model = model
         self.temperature = temperature
         self.systemMsg = systemMsg
-        memory = MemorySaver()
+        self.memory = MemorySaver()
 
     def compileGraph(self):
+        memStore  = MemorySaver()
         graph_builder = StateGraph(State)
         graph_builder.add_node("chatbot" , self.chatbot)
         graph_builder.add_edge(START , "chatbot")
         graph_builder.add_edge("chatbot" , END)
-        self.graph = graph_builder.compile(checkpointer = self.memory)
+        self.graph = graph_builder.compile(checkpointer = memStore)
 
+    def getGraph(self):
+        return self.graph
 
     def chatbot(self , state: State):
         llm = self.generateLLM("")
@@ -56,23 +59,7 @@ class ollamaGenerator:
             llmRes = self.chatResponse(userMsg , chatHistory)
         elif histAppr == "Summary of History":
             llmRes = self.chatResbySummary(userMsg , chatHistory)
-        else:
-            #self.compileGraph()
-            config = {"configurable": {"thread_id": "1"}}
-            event = self.graph.stream({"messages": [("user" , userMsg)]} , config , stream_mode = "updates")
-            llmRes = event["chatbot"]["messages"].content
         return llmRes
-            
-    def streamGenerator(self , userMsg , chatHistory , histAppr):
-        if histAppr == "Full memory history":
-            return self.chatResponse(userMsg , chatHistory)
-        elif histAppr == "Summary of History":
-            return self.chatResbySummary(userMsg , chatHistory)
-        else:
-            #self.compileGraph()
-            config = {"configurable": {"thread_id": "1"}}
-            events = self.graph.stream({"messages": [("user" , userMsg)]} , config , stream_mode = "values")
-            return events
 
     def summarizeHistory(self , chatHistory):
         msghistory = [("system" , "You are helpful assistant having expertise on summarizing chat history without missing any details.") , ("user" , "Following Chat History is a history of humane and AI assistant chat. Summarize the chat history into a single summary message. Include as many specific details as you can. Respond user only with the content of the summary but no other extra content generated.  Place the summarized content after keyword summary in the format of SUMMARY: . \n\n Chat History: {chathist}")]
@@ -98,7 +85,8 @@ class ollamaGenerator:
         #print(promptTemplate.messages)
         set_verbose(True)
         #return chain.stream({"histSummary": chatSummary , "questionMsg": userMsg})
-        return chain.invoke({"histSummary": chatSummary , "questionMsg": userMsg})
+        response =  chain.invoke({"histSummary": chatSummary , "questionMsg": userMsg})
+        return response.content
 
     def chatResponse(self , userMsg , msgHistory):
         chatHistory = []
@@ -113,6 +101,7 @@ class ollamaGenerator:
         llm = self.generateLLM(model = "gemma2:2b")
         chain = promptTemplate | llm
         #return chain.stream({"inputMsg": userMsg})
-        return chain.invoke({"inputMsg": userMsg})
+        response = chain.invoke({"inputMsg": userMsg})
+        return response.content
 
 
