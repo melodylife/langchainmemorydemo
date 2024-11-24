@@ -81,12 +81,9 @@ class ollamaGenerator:
         promptTemplate = ChatPromptTemplate.from_messages(msgTemplate)
         llm = self.generateLLM(model = "gemma2:2b")
         chain = promptTemplate | llm
-        #print("This is the summary "+ chatSummary)
-        #print(promptTemplate.messages)
-        set_verbose(True)
-        #return chain.stream({"histSummary": chatSummary , "questionMsg": userMsg})
         response =  chain.invoke({"histSummary": chatSummary , "questionMsg": userMsg})
-        return response.content
+        #return response.content
+        return response
 
     def chatResponse(self , userMsg , msgHistory):
         chatHistory = []
@@ -100,8 +97,8 @@ class ollamaGenerator:
         promptTemplate = ChatPromptTemplate.from_messages(msgTemplate)
         llm = self.generateLLM(model = "gemma2:2b")
         chain = promptTemplate | llm
-        #return chain.stream({"inputMsg": userMsg})
         response = chain.invoke({"inputMsg": userMsg})
-        return response.content
+        #return response.content
+        return response
 
 

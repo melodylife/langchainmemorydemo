@@ -33,7 +33,8 @@ def invokeGraph(userMsg):
     config = {"configurable": {"thread_id": "1"}}
     llmRes = ""
     for event in graphbot.stream({"messages": [("user" ,userMsg)]} , config = config , stream_mode = "values"):
-        llmRes = event["messages"][-1].content
+        #llmRes = event["messages"][-1].content
+        llmRes = event["messages"][-1]
     return llmRes
 
 for msgItem in st.session_state.chatMsgHistory:
@@ -65,9 +66,14 @@ if userInput:
     st.session_state.chatMsgHistory.append({"role": "user", "content": userInput} )
     with st.chat_message("user"):
         st.write(userInput)
-    modelRes = ollamaGen.llmResponse(userInput , st.session_state.chatMsgHistory , memoFunction)
     if memoFunction == "Lang-graph implementation":
-        modelRes = invokeGraph(userInput)
+        modelResMsg = invokeGraph(userInput)
+        modelRes = modelResMsg.content
+        st.session_state.inputToken = modelResMsg.usage_metadata["input_tokens"]
+    else:
+        modelResMsg = ollamaGen.llmResponse(userInput , st.session_state.chatMsgHistory , memoFunction)
+        modelRes = modelResMsg.content
+        st.session_state.inputToken = modelResMsg.usage_metadata["input_tokens"]
     streamOutput = streamGenerator(modelRes)
     with st.chat_message("ai"):
         modelRes =  st.write_stream(streamWrapper(streamOutput))
