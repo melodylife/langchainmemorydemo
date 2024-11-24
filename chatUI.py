@@ -33,7 +33,6 @@ def invokeGraph(userMsg):
     config = {"configurable": {"thread_id": "1"}}
     llmRes = ""
     for event in graphbot.stream({"messages": [("user" ,userMsg)]} , config = config , stream_mode = "values"):
-        #llmRes = event["messages"][-1].content
         llmRes = event["messages"][-1]
     return llmRes
 

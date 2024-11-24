@@ -82,7 +82,6 @@ class ollamaGenerator:
         llm = self.generateLLM(model = "gemma2:2b")
         chain = promptTemplate | llm
         response =  chain.invoke({"histSummary": chatSummary , "questionMsg": userMsg})
-        #return response.content
         return response
 
     def chatResponse(self , userMsg , msgHistory):
@@ -98,7 +97,6 @@ class ollamaGenerator:
         llm = self.generateLLM(model = "gemma2:2b")
         chain = promptTemplate | llm
         response = chain.invoke({"inputMsg": userMsg})
-        #return response.content
         return response
 
 
